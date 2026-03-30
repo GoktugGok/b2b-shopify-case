@@ -44,7 +44,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               }
             });
 
-            const laravelResponse = await fetch(`${process.env.LARAVEL_API_URL || "http://127.0.0.1:8000"}/api/webhook/inventory`, {
+            const laravelResponse = await fetch(`${process.env.API_URL}/api/webhook/inventory`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -115,7 +115,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       console.log(`🔔 WEBHOOK GELDİ (ORDER): ${topic} -> ${endpoint} -> ${orderName}`);
       console.log("📦 SIPARIŞ DETAYI:", JSON.stringify(payload, null, 2));
       try {
-        await fetch(`${process.env.LARAVEL_API_URL || "http://127.0.0.1:8000"}/api/webhook/${endpoint}`, {
+        await fetch(`${process.env.API_URL}/api/webhook/${endpoint}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

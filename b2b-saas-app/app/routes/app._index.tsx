@@ -24,7 +24,7 @@ import prisma from "../db.server";
 // Global Redis Bağlantısı (Upstash)
 const redis = new Redis("rediss://default:gQAAAAAAASmGAAIncDI1MDIxZmMwNzFkMmU0MmZjYTZkMjhmMDdiZmNjOGVjOXAyNzYxNjY@closing-stinkbug-76166.upstash.io:6379");
 
-const BACKEND_URL = process.env.LARAVEL_API_URL || "http://127.0.0.1:8000";
+const BACKEND_URL = process.env.API_URL;
 
 // Yardımcı Fonksiyon: Ürünün Shopify'da aktif olup olmadığını kontrol eder (Dashboard ile tutarlı)
 const isActiveProduct = (p: any) => p.is_on_shopify == true || p.is_on_shopify == 1 || p.is_on_shopify == "1";
