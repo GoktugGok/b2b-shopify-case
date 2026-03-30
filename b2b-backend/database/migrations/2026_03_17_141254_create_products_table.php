@@ -10,17 +10,22 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('sku')->unique();
-            $table->string('name');
-            $table->decimal('price', 10, 2);
-            $table->integer('stock')->default(0);
-            $table->boolean('is_on_shopify')->default(false);
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('products', function (Blueprint $table) {
+        $table->id();
+        $table->string('sku')->unique();
+        $table->string('name');
+        $table->decimal('price', 15, 2);
+        $table->integer('stock');
+        $table->boolean('is_published')->default(false);
+        $table->boolean('is_on_shopify')->default(false);
+        
+        // HATA ALDIĞIN EKSİK SATIR TAM OLARAK BU:
+        $table->decimal('b2b_price', 15, 2)->nullable(); 
+        
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
