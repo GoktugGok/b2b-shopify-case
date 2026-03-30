@@ -2,7 +2,7 @@
 
 client_id = "c3836975d68e6885f04c5c00ba3ea398"
 name = "b2b-saas-app"
-application_url = "https://example.com"
+application_url = "https://b2b-shopify-case.vercel.app"
 embedded = true
 
 [build]
@@ -28,7 +28,7 @@ api_version = "2026-04"
 scopes = "read_inventory,read_locations,read_orders,write_inventory,write_metaobject_definitions,write_metaobjects,write_orders,write_products,read_discounts,write_discounts,read_publications,write_publications"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://b2b-shopify-case.vercel.app/api/auth" ]
 
 [[extensions]]
 handle = "b2b-cart-discount"
