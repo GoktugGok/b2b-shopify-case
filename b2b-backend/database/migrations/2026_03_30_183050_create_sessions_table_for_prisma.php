@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Prisma bu tabloyu tam olarak 'Session' (büyük S ile) adında bekliyor
+        // Prisma loglarında küçük 'session' aradığı için burayı küçük harf yapıyoruz
         Schema::create('session', function (Blueprint $table) {
-            $table->string('id', 191)->primary(); // MySQL 1170 hatasını önlemek için uzunluk 191
+            $table->string('id', 191)->primary(); 
             $table->string('shop');
             $table->string('state');
             $table->boolean('isOnline')->default(false);
@@ -33,6 +33,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('Session');
+        // Burayı da up() ile aynı yapmalısın: 'session'
+        Schema::dropIfExists('session');
     }
 };
