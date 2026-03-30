@@ -1,0 +1,137 @@
+{%- comment -%}
+  B2B App Embed Block v7
+  - Underscore prefix kaldırıldı (linter uyumlu)
+  - if içinde pipe filter kullanılmıyor (syntax fix)
+  - Tüm Liquid script dışında
+{%- endcomment -%}
+
+{{- 'b2b-global.css' | asset_url | stylesheet_tag -}}
+
+{%- comment -%} ══ Müşteri B2B mi? ══ {%- endcomment -%}
+{%- assign b2b_is_b2b = false -%}
+{%- if customer -%}
+  {%- for b2b_tag in customer.tags -%}
+    {%- assign b2b_tag_lower = b2b_tag | downcase -%}
+    {%- if b2b_tag_lower == 'b2b' or b2b_tag_lower == 'b2b_premium' -%}
+      {%- assign b2b_is_b2b = true -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- if b2b_is_b2b -%}
+  <style id="b2b-nuclear-style">
+    /* Ürün detay sayfasında orijinal Shopify fiyatını ANINDA gizle (B2B kullanıcıları için) */
+    .template-product .price:not(.b2b-detail-price *),
+    .template-product .product__info-container .price,
+    .template-product .product-single__info-wrapper .price,
+    .template-product .price--large:not(.b2b-detail-price *) {
+      display: none !important;
+    }
+    /* Bizim B2B bloğumuzun her zaman görünür olmasını sağla */
+    .b2b-detail-price {
+       display: inline-flex !important;
+    }
+  </style>
+{%- endif -%}
+
+{%- comment -%} ══ B2B Fiyat Map'i ══
+  Source 1: collections.all (Genel Ürün Havuzu - Paginated to bypass 50 limit)
+  Source 2: collection (Mevcut koleksiyon)
+  Source 3: product (Mevcut ürün)
+{%- endcomment -%}
+
+{%- assign b2b_sym   = cart.currency.symbol -%}
+{%- assign b2b_parts = '' -%}
+{%- assign b2b_sep   = '' -%}
+
+{%- comment -%} KAYNAK 1: Tüm ürünleri tara (Paginate ile 250'ye kadar) {%- endcomment -%}
+{%- assign b2b_all_handle = 'all' -%}
+{%- assign b2b_all = collections[b2b_all_handle] -%}
+
+{%- if b2b_all -%}
+  {%- paginate b2b_all.products by 250 -%}
+    {%- for b2b_p in b2b_all.products -%}
+      {%- assign b2b_var  = b2b_p.selected_or_first_available_variant -%}
+      {%- assign b2b_meta = b2b_var.metafields.custom.b2b_price -%}
+      {%- if b2b_meta != blank -%}
+        {%- assign b2b_pf   = b2b_meta | times: 1.0 | round: 2 -%}
+        {%- assign b2b_of   = b2b_var.price | money_without_currency -%}
+        {%- capture b2b_row -%}{{ b2b_sep }}{{ b2b_p.handle | json }}: {"b2b": {{ b2b_pf | json }}, "orig": {{ b2b_of | json }}, "sym": {{ b2b_sym | json }}}{%- endcapture -%}
+        {%- assign b2b_parts = b2b_parts | append: b2b_row -%}
+        {%- assign b2b_sep = ',' -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endpaginate -%}
+{%- endif -%}
+
+{%- comment -%} KAYNAK 2: Mevcut koleksiyon sayfası (Eksik kalanları tamamla) {%- endcomment -%}
+{%- if collection -%}
+  {%- for b2b_p in collection.products limit: 50 -%}
+    {%- assign b2b_var  = b2b_p.selected_or_first_available_variant -%}
+    {%- assign b2b_meta = b2b_var.metafields.custom.b2b_price -%}
+    {%- if b2b_meta != blank -%}
+      {%- capture b2b_chk -%}{{ b2b_p.handle | json }}:{%- endcapture -%}
+      {%- unless b2b_parts contains b2b_chk -%}
+        {%- assign b2b_pf = b2b_meta | times: 1.0 | round: 2 -%}
+        {%- assign b2b_of = b2b_var.price | money_without_currency -%}
+        {%- capture b2b_row -%}{{ b2b_sep }}{{ b2b_p.handle | json }}: {"b2b": {{ b2b_pf | json }}, "orig": {{ b2b_of | json }}, "sym": {{ b2b_sym | json }}}{%- endcapture -%}
+        {%- assign b2b_parts = b2b_parts | append: b2b_row -%}
+        {%- assign b2b_sep = ',' -%}
+      {%- endunless -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- comment -%} KAYNAK 3: Ürün detay sayfası {%- endcomment -%}
+{%- if product -%}
+  {%- assign b2b_var  = product.selected_or_first_available_variant -%}
+  {%- assign b2b_meta = b2b_var.metafields.custom.b2b_price -%}
+  {%- if b2b_meta != blank -%}
+    {%- capture b2b_chk -%}{{ product.handle | json }}:{%- endcapture -%}
+    {%- unless b2b_parts contains b2b_chk -%}
+      {%- assign b2b_pf = b2b_meta | times: 1.0 | round: 2 -%}
+      {%- assign b2b_of = b2b_var.price | money_without_currency -%}
+      {%- capture b2b_row -%}{{ b2b_sep }}{{ product.handle | json }}: {"b2b": {{ b2b_pf | json }}, "orig": {{ b2b_of | json }}, "sym": {{ b2b_sym | json }}}{%- endcapture -%}
+      {%- assign b2b_parts = b2b_parts | append: b2b_row -%}
+      {%- assign b2b_sep = ',' -%}
+    {%- endunless -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- comment -%} ══ Verileri script'e JSON olarak aktar ══ {%- endcomment -%}
+<script>
+  window.B2BConfig = {
+    customerId   : {{ customer.id | default: 'null' }},
+    isB2B        : {{ b2b_is_b2b }},
+    currency     : {{ b2b_sym | json }},
+    productHandle: {{ product.handle | json | default: 'null' }},
+    freshCartMap : {
+      {%- for item in cart.items -%}
+        "{{ item.variant_id }}": {{ item.variant.metafields.custom.b2b_price | json | default: 'null' }}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    }
+  };
+
+  window.B2BPrices = { {{ b2b_parts }} };
+
+  if (window.B2BConfig.isB2B) {
+    document.documentElement.classList.add('b2b-active');
+  }
+</script>
+
+<script src="{{ 'b2b-global.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "B2B Global Embed",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "B2B Otomatik Fiyat Enjeksiyonu",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,41 @@
+{%- comment -%}
+  b2b_price_display.liquid — Ürün Detay Sayfası (v3)
+
+  Tasarım: Orijinal fiyat üstü çizili (soluk) + B2B fiyatı kalın teal + küçük "B2B" pill
+  Flash önleme: html.b2b-active class embed block tarafından HEAD'de set edilir
+  Fiyat formatı: times:1.0 | round:2 (money_without_currency KULLANMA → 0.43 hatası)
+{%- endcomment -%}
+
+{%- if customer -%}
+  {%- assign is_b2b = false -%}
+  {%- for tag in customer.tags -%}
+    {%- assign t = tag | downcase -%}
+    {%- if t == 'b2b' or t == 'b2b_premium' -%}{%- assign is_b2b = true -%}{%- endif -%}
+  {%- endfor -%}
+
+  {%- assign v         = product.selected_or_first_available_variant -%}
+  {%- assign b2b_price = v.metafields.custom.b2b_price -%}
+  {%- assign sym       = cart.currency.symbol -%}
+
+  {%- if is_b2b and b2b_price != blank -%}
+    {%- assign b2b_f  = b2b_price | times: 1.0 | round: 2 -%}
+    {%- assign orig_f = v.price | money_without_currency -%}
+
+    <div class="b2b-detail-price">
+      <span class="b2b-was-detail">{{ sym }}{{ orig_f }}</span>
+      <div class="b2b-price-row">
+        <span class="b2b-now-detail">{{ sym }}{{ b2b_f }}</span>
+        <span class="b2b-tag-pill">B2B</span>
+      </div>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "B2B Fiyat Gösterici",
+  "target": "section",
+  "templates": ["product"],
+  "settings": []
+}
+{% endschema %}

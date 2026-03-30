@@ -1,0 +1,98 @@
+{%- comment -%}
+  Snippet: b2b_card_price  (v3 — Liquid-first, JS-minimal)
+
+  KULLANIM (tema kart template'inde fiyat elementinin HEMEN ALTINA):
+    {%- render 'b2b_card_price', product: card_product -%}
+
+  Ne yapar:
+    1. B2B müşteriyse ve ürünün b2b_price metafield'ı varsa:
+       - Üstü çizili orjinal fiyat + altında kalın B2B fiyatı render eder
+       - Satirsatır inline <script> kartın üzerindeki orjinal fiyat
+         elementini bulmak için hemen (sync) çalışır → flash yok
+    2. Değilse hiçbir şey render etmez
+
+  FIYAT FORMATI:
+    number_decimal metafield → raw float gelir ("43.0")
+    money_without_currency KULLANMA → kuruşa böler (0.43 hatası)
+    Doğrusu: b2b_price | times: 1.0 | round: 2
+{%- endcomment -%}
+
+{%- assign variant   = product.selected_or_first_available_variant -%}
+{%- assign b2b_price = variant.metafields.custom.b2b_price -%}
+
+{%- if customer and b2b_price != blank -%}
+  {%- assign is_b2b = false -%}
+  {%- for tag in customer.tags -%}
+    {%- assign t = tag | downcase -%}
+    {%- if t == 'b2b' -%}{%- assign is_b2b = true -%}{%- endif -%}
+  {%- endfor -%}
+
+  {%- if is_b2b -%}
+    {%- assign b2b_f   = b2b_price | times: 1.0 | round: 2 -%}
+    {%- assign orig_f  = variant.price | money_without_currency -%}
+    {%- assign sym     = cart.currency.symbol -%}
+
+    {{- '' -}}
+    {{- '<!-- b2b_card_price snippet -->' -}}
+
+    {{- '' -}}<!-- Inline script: orjinal fiyatı sync olarak bul ve işaretle
+                    (sayfa paint'ten önce çalışır → flash yok) -->
+    <script>
+      (function () {
+        var me = document.currentScript;
+        if (!me) return;
+        /* Kartın container'ını bul (tema-agnostik, genişten dara) */
+        var card = me.closest(
+          'li.grid__item, li.collection__item, li.product-grid__item,' +
+          '.card-wrapper, article.card, .product-item,' +
+          'li, article'
+        );
+        if (!card) return;
+
+        /* Orjinal fiyat elementini bul — spesifikten generic'e */
+        var SELECTORS = [
+          '.price__regular .price-item--regular',
+          '.price__regular',
+          '.price-item--regular',
+          '.product-item__price',
+          '.card-information__price .price',
+          '.price .money',
+          '.price:not(.b2b-price-block)',
+        ];
+        var priceEl = null;
+        for (var i = 0; i < SELECTORS.length; i++) {
+          var el = card.querySelector(SELECTORS[i]);
+          if (el && !el.classList.contains('b2b-price-block')) {
+            priceEl = el;
+            break;
+          }
+        }
+        /* Fallback: içinde "price" geçen ilk text-bearing element */
+        if (!priceEl) {
+          var all = card.querySelectorAll('*');
+          for (var j = 0; j < all.length; j++) {
+            var cn = all[j].className;
+            if (cn && typeof cn === 'string' &&
+                cn.indexOf('price') !== -1 &&
+                cn.indexOf('b2b') === -1 &&
+                all[j].children.length <= 3) {
+              priceEl = all[j];
+              break;
+            }
+          }
+        }
+        /* Bulunduysa class ekle (CSS halleder, !important yok) */
+        if (priceEl) {
+          priceEl.classList.add('b2b-sibling-price');
+        }
+      })();
+    </script>
+
+    {{- '' -}}<!-- Sunucu tarafında render edilen temiz B2B fiyat bloğu -->
+    <div class="b2b-price-block">
+      <span class="b2b-was">{{ sym }}{{ orig_f }}</span>
+      <span class="b2b-now">{{ sym }}{{ b2b_f }}</span>
+    </div>
+
+  {%- endif -%}
+{%- endif -%}

@@ -1,0 +1,138 @@
+/* ================================================================
+   B2B Global Styles v4
+   Embed block tarafından <head>'de yüklenir → layout shift yok
+   ================================================================ */
+
+/* ── Flash Önleme ───────────────────────────────────────────────
+   html.b2b-active class'ı embed block <script>'i tarafından
+   sayfa render'ından önce set edilir.
+   Snippet tarafından eklenmiş .b2b-struck elementleri CSS ile de
+   hemen gizlenir → JS gecikmesi = görünür flash yok.
+   ────────────────────────────────────────────────────────────── */
+html.b2b-active .b2b-struck {
+  text-decoration: line-through !important;
+  opacity: 0.45 !important;
+  font-size: 0.88em !important;
+}
+
+/* ── B2B Fiyat Bloğu (Kart / Koleksiyon / Anasayfa) ───────────
+   JS tarafından DOM'a enjekte edilir.
+   flex-column: üstü çizili fiyat üstte, B2B fiyatı altında.
+   ────────────────────────────────────────────────────────────── */
+.b2b-price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+/* Üstü çizili eski fiyat */
+.b2b-price-block .b2b-was {
+  display: block;
+  font-size: 0.85em;
+  font-weight: 400;
+  text-decoration: line-through !important;
+  opacity: 0.45;
+  color: currentColor;
+}
+
+/* İndirimli B2B fiyatı — kalın, teal */
+.b2b-price-block .b2b-now {
+  display: block;
+  font-size: 1.05em;
+  font-weight: 700;
+  color: #0f766e;          /* teal-700 — kurumsal, profesyonel */
+  letter-spacing: -0.01em;
+}
+
+/* ── Ürün Detay Sayfası (b2b_price_display block) ──────────────
+   Satır içi: eski fiyat + B2B fiyat + small pill
+   ────────────────────────────────────────────────────────────── */
+.b2b-detail-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 6px 0 12px;
+  padding-left: 4px; /* Sol taraftan biraz uzaklaştırıldı */
+}
+
+.b2b-detail-price .b2b-was-detail {
+  font-size: 0.9em;
+  font-weight: 400;
+  text-decoration: line-through !important;
+  opacity: 0.45;
+  color: currentColor;
+  margin-bottom: -2px;
+}
+
+/* Fiyat ve etiket satırı */
+.b2b-price-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important; /* Daha yakın */
+}
+
+.b2b-detail-price .b2b-now-detail {
+  font-size: 1.5em; /* Daha büyük fiyat */
+  font-weight: 700;
+  color: #0f766e;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* Küçük "B2B" rozet pill */
+.b2b-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #ccfbf1;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── Animasyon ───────────────────────────────────────────────── */
+.b2b-price-block,
+.b2b-detail-price {
+  animation: b2bFadeIn 0.2s ease-out both;
+}
+
+@keyframes b2bFadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ── Detay Sayfası KESİN ÇÖZÜM ──────────────────────────────────
+   B2B kullanıcıları için orijinal Shopify fiyatını tamamen gizle.
+   Hem .price, hem [id*="price"], hem de [class*="price"] yakalanır.
+   B2B blokları (.b2b-detail-price) bu kuraldan muaftır.
+   ────────────────────────────────────────────────────────────── */
+html.b2b-active .template-product .price:not(.b2b-detail-price *):not(.b2b-detail-price),
+html.b2b-active .template-product [id*="price"]:not(.b2b-detail-price *):not(.b2b-detail-price),
+html.b2b-active .template-product [class*="product__price"]:not(.b2b-detail-price *):not(.b2b-detail-price),
+html.b2b-active .template-product .price-item:not(.b2b-now-detail) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Kendi B2B bloğumuzun her durumda görünür kalmasını sağla */
+html.b2b-active .b2b-detail-price,
+html.b2b-active .b2b-detail-price * {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+}

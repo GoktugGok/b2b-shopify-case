@@ -1,0 +1,13 @@
+# Monorepo kökü — alt projelerin kendi .gitignore dosyalarıyla birlikte kullanın
+.env
+.env.backup
+.env.production
+.env.local
+!.env.example
+**/vendor/
+**/node_modules/
+**/storage/*.key
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
