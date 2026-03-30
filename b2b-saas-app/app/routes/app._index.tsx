@@ -24,6 +24,8 @@ import prisma from "../db.server";
 // Global Redis Bağlantısı (Upstash)
 const redis = new Redis("rediss://default:gQAAAAAAASmGAAIncDI1MDIxZmMwNzFkMmU0MmZjYTZkMjhmMDdiZmNjOGVjOXAyNzYxNjY@closing-stinkbug-76166.upstash.io:6379");
 
+const BACKEND_URL = process.env.LARAVEL_API_URL || "http://127.0.0.1:8000";
+
 // Yardımcı Fonksiyon: Ürünün Shopify'da aktif olup olmadığını kontrol eder (Dashboard ile tutarlı)
 const isActiveProduct = (p: any) => p.is_on_shopify == true || p.is_on_shopify == 1 || p.is_on_shopify == "1";
 
@@ -36,7 +38,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   if (products.length === 0) {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/products");
+      const response = await fetch(`${BACKEND_URL}/api/products`);
       const result = await response.json();
       products = result.data || [];
       if (products.length > 0) {
@@ -66,7 +68,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (_action === "refresh") {
       await redis.del("b2b_products");
 
-      const response = await fetch("http://127.0.0.1:8000/api/products");
+      const response = await fetch(`${BACKEND_URL}/api/products`);
       const result = await response.json();
       const products = result.data || [];
 
@@ -112,7 +114,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       if (cachedData) {
         products = JSON.parse(cachedData);
       } else {
-        const response = await fetch("http://127.0.0.1:8000/api/products");
+        const response = await fetch(`${BACKEND_URL}/api/products`);
         const result = await response.json();
         products = result.data || [];
       }
@@ -329,12 +331,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         : new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
       // b) Laravel API'sine last_sync parametresini ileterek gerçek Incremental filtrasyonu yaptır
-      const response = await fetch(`http://127.0.0.1:8000/api/products?incremental=true&last_sync=${lastSyncDate}`);
+      const response = await fetch(`${BACKEND_URL}/api/products?incremental=true&last_sync=${lastSyncDate}`);
       const result = await response.json();
       const incrementalProducts = result.data || [];
 
       // c) GHOST CLEANUP için tüm Laravel SKU'larını çek
-      const fullLaravelRes = await fetch("http://127.0.0.1:8000/api/products");
+      const fullLaravelRes = await fetch(`${BACKEND_URL}/api/products`);
       const fullLaravelResult = await fullLaravelRes.json();
       const fullLaravelProducts = fullLaravelResult.data || [];
       const laravelSkus = new Set(fullLaravelProducts.map((p: any) => p.sku));
