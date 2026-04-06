@@ -2,8 +2,8 @@
   "name": "b2b-saas-app",
   "private": true,
   "scripts": {
-    "build": "node prisma/setup-ca.js && react-router build",
-    "dev": "node prisma/setup-ca.js && shopify app dev",
+    "build": "react-router build",
+    "dev": "shopify app dev",
     "config:link": "shopify app config link",
     "generate": "shopify app generate",
     "deploy": "shopify app deploy",
