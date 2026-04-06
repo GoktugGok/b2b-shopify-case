@@ -1,0 +1,46 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Node
+node_modules
+npm-debug.log
+
+# Laravel dev files
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+.phpactor.json
+
+# Docker
+Dockerfile
+docker/
+.dockerignore
+render.yaml
+
+# IDE
+.vscode
+.idea
+.fleet
+.nova
+.zed
+
+# Test
+tests/
+phpunit.xml
+
+# Docs & config
+README.md
+Homestead.json
+Homestead.yaml
+
+# Storage (runtime'da oluşacak)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Public build (Docker'da build edilecek)
+public/hot
