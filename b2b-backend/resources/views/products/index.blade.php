@@ -77,6 +77,7 @@
                                 <a href="{{ route('products.index') }}" class="flex-1 sm:flex-none text-center px-4 py-2 text-sm font-medium rounded-lg border {{ !request('filter') && !request('search') ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' }} transition-colors shadow-sm">Tümü</a>
                                 <a href="{{ route('products.index', array_merge(request()->only('search'), ['filter' => 'active'])) }}" class="px-4 py-2 text-sm font-medium rounded-lg border {{ request('filter') == 'active' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' }} transition-colors shadow-sm">Aktifler</a>
                                 <a href="{{ route('products.index', array_merge(request()->only('search'), ['filter' => 'published'])) }}" class="px-4 py-2 text-sm font-medium rounded-lg border {{ request('filter') == 'published' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' }} transition-colors shadow-sm">Yayındakiler</a>
+                                <a href="{{ route('products.index', array_merge(request()->only('search'), ['filter' => 'inactive'])) }}" class="px-4 py-2 text-sm font-medium rounded-lg border {{ request('filter') == 'inactive' ? 'bg-gray-100 text-gray-700 border-gray-300' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50' }} transition-colors shadow-sm">Pasifler</a>
                             </div>
                         </div>
 
