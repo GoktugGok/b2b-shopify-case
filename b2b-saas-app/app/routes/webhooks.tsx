@@ -158,7 +158,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               /* GÜVENLİK KORUMASI: Sadece stok farkı, sipariş adetleriyle tam eşleşiyorsa logu siparişe çek */
               const oldM = recentManualLog.details.match(/(\d+)\s*[➔\-➔]/);
               const newM = recentManualLog.details.match(/[➔\-➔]\s*(\d+)/);
-              
+
               if (oldM && newM) {
                 const diff = parseInt(newM[1], 10) - parseInt(oldM[1], 10);
                 const expectedDiff = isCancellation ? Number(item.quantity) : -Number(item.quantity);
