@@ -49,7 +49,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
               headers: {
                 "Content-Type": "application/json",
                 "X-Shopify-Hmac-Sha256": request.headers.get("x-shopify-hmac-sha256") || "",
-                "X-Shopify-Topic": topic
+                "X-Shopify-Topic": topic,
+                "Authorization": `Bearer ${process.env.SYNC_SECRET_KEY}`
               },
               body: JSON.stringify({
                 sku,
@@ -120,7 +121,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           headers: {
             "Content-Type": "application/json",
             "X-Shopify-Hmac-Sha256": request.headers.get("x-shopify-hmac-sha256") || "",
-            "X-Shopify-Topic": topic
+            "X-Shopify-Topic": topic,
+            "Authorization": `Bearer ${process.env.SYNC_SECRET_KEY}`
           },
           body: JSON.stringify(payload),
         });
