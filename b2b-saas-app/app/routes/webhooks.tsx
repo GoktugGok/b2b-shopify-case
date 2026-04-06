@@ -189,6 +189,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
                   console.log(`ℹ️ Log Korundu: SKU ${item.sku} [Miktar Farklı: Manuel=${diff}, Sipariş=${expectedDiff}]`);
                 }
               }
+            } else {
+              // En kötü durumda (inventory webhook'u gecikirse vs) doğrudan sipariş logu bas
+              await (prisma.syncLog as any).create({
+                data: {
+                  actionType: "WEBHOOK_SYNC",
+                  status: "SUCCESS",
+                  productsSynced: 1,
+                  source: isCancellation ? "cancel" : "order",
+                  details: isCancellation
+                    ? `❌ Sipariş iptal oldu ${orderName} | SKU: ${item.sku} (Adet: +${item.quantity})`
+                    : `📦 Sipariş oluşturuldu ${orderName} | SKU: ${item.sku} (Adet: -${item.quantity})`,
+                },
+              });
+              console.log(`✅ Orijinal stok logu bulunamadı, Sipariş Logu zorla oluşturuldu: SKU ${item.sku} (#${orderName})`);
             }
           }
         }
