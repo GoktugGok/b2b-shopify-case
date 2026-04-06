@@ -4,7 +4,7 @@ export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
   
   // LİSTEDEN GELEN GERÇEK VE ÇALIŞAN ID ✅
-  const functionId = "019d0b5b-e174-7d3c-816e-5de098645fe2"; 
+  const functionId = "ef98e9a5-969e-4ae6-3d6d-4c572991eb495b30c551"; 
 
   const response = await admin.graphql(
     `#graphql
