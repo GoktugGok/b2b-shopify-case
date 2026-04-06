@@ -10,28 +10,32 @@ class VerifyShopifyWebhook
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $secret = (string) config('services.shopify.webhook_secret', '');
+        $expectedToken = config('app.sync_secret_key');
+        
+        // ENV'den config('app.sync_secret_key') gelmiyorsa fallback olarak direkt okuyalım
+        if (!$expectedToken) {
+            $expectedToken = env('SYNC_SECRET_KEY');
+        }
 
-        if ($secret === '') {
+        if (empty($expectedToken)) {
             if (app()->environment('production')) {
                 return response()->json(['error' => 'Webhook secret not configured'], 500);
             }
-
             return $next($request);
         }
 
-        $hmacHeader = $request->header('X-Shopify-Hmac-Sha256');
-        if ($hmacHeader === null || $hmacHeader === '') {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        $authHeader = $request->header('Authorization');
+        
+        // Eğer Remix bize Authorization: Bearer <TOKEN> olarak atıyorsa:
+        if ($authHeader === 'Bearer ' . $expectedToken) {
+            return $next($request);
+        }
+        
+        // Veya X-Sync-Secret olarak atıyorsa vs. (fallback)
+        if ($request->header('X-Sync-Secret') === $expectedToken) {
+            return $next($request);
         }
 
-        $data = $request->getContent();
-        $calculatedHmac = base64_encode(hash_hmac('sha256', $data, $secret, true));
-
-        if (! hash_equals($calculatedHmac, (string) $hmacHeader)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $next($request);
+        return response()->json(['error' => 'Unauthorized sync request'], 401);
     }
 }
