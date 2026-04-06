@@ -67,7 +67,8 @@ RUN apk add --no-cache \
     freetype \
     oniguruma \
     icu-libs \
-    mysql-client
+    mysql-client \
+    dos2unix
 
 # PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -93,7 +94,11 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
+# CRLF -> LF dönüşümü (Windows'ta oluşturulan dosyalar için)
+RUN dos2unix /entrypoint.sh \
+    && dos2unix /etc/nginx/nginx.conf \
+    && dos2unix /etc/supervisor/conf.d/supervisord.conf \
+    && chmod +x /entrypoint.sh
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html \

@@ -14,9 +14,8 @@ npm-debug.log
 .phpunit.result.cache
 .phpactor.json
 
-# Docker
+# Docker meta dosyaları (docker/ klasörü COPY edilmesi gerektiği için hariç tutulmaz!)
 Dockerfile
-docker/
 .dockerignore
 render.yaml
 
