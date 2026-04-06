@@ -32,3 +32,6 @@ database.sqlite
 # Additional Rules
 vendor/
 storage/*.key
+# Aiven CA Certificate
+prisma/aiven-ca.pem
+
