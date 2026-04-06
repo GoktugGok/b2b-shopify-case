@@ -1,52 +1,165 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
-// enough when changing adapters.
-// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model Session {
-  id            String    @id
-  shop          String
-  state         String
-  isOnline      Boolean   @default(false)
-  scope         String?
-  expires       DateTime?
-  accessToken   String
-  userId        BigInt?
-  firstName     String?
-  lastName      String?
-  email         String?
-  accountOwner  Boolean   @default(false)
-  locale        String?
-  collaborator  Boolean?  @default(false)
-  emailVerified Boolean?  @default(false)
-  refreshToken        String?
-  refreshTokenExpires DateTime?
+  id                  String    @id
+  shop                String    @db.VarChar(255)
+  state               String    @db.VarChar(255)
+  isOnline            Boolean   @default(false)
+  scope               String?   @db.VarChar(255)
+  expires             DateTime? @db.DateTime(0)
+  accessToken         String    @db.VarChar(255)
+  userId              BigInt?
+  firstName           String?   @db.VarChar(255)
+  lastName            String?   @db.VarChar(255)
+  email               String?   @db.VarChar(255)
+  accountOwner        Boolean   @default(false)
+  locale              String?   @db.VarChar(255)
+  collaborator        Boolean   @default(false)
+  emailVerified       Boolean   @default(false)
+  refreshToken        String?   @db.VarChar(255)
+  refreshTokenExpires DateTime? @db.DateTime(0)
+  created_at          DateTime? @db.Timestamp(0)
+  updated_at          DateTime? @db.Timestamp(0)
 
   @@map("session")
 }
 
 model SyncLog {
-  id             Int      @id @default(autoincrement())
-  actionType     String   // CACHE_REFRESH, MANUAL_SYNC, WEBHOOK_SYNC
-  status         String   // SUCCESS, ERROR
+  id             BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  actionType     String   @db.VarChar(255)
+  status         String   @db.VarChar(255)
   productsSynced Int?     @default(0)
-  source         String?  // order, manual
-  details        String?
-  createdAt      DateTime @default(now())
+  source         String?  @db.VarChar(255)
+  details        String?  @db.LongText
+  createdAt      DateTime @default(now()) @db.Timestamp(0)
 }
 
 model PendingOrderSku {
-  id        Int      @id @default(autoincrement())
-  sku       String
-  createdAt DateTime @default(now())
+  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  sku       String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+}
+
+model cache {
+  key        String @id @db.VarChar(255)
+  value      String @db.MediumText
+  expiration Int
+
+  @@index([expiration], map: "cache_expiration_index")
+}
+
+model cache_locks {
+  key        String @id @db.VarChar(255)
+  owner      String @db.VarChar(255)
+  expiration Int
+
+  @@index([expiration], map: "cache_locks_expiration_index")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model job_batches {
+  id             String  @id @db.VarChar(255)
+  name           String  @db.VarChar(255)
+  total_jobs     Int
+  pending_jobs   Int
+  failed_jobs    Int
+  failed_job_ids String  @db.LongText
+  options        String? @db.MediumText
+  cancelled_at   Int?
+  created_at     Int
+  finished_at    Int?
+}
+
+model jobs {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  queue        String @db.VarChar(255)
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "jobs_queue_index")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model password_reset_tokens {
+  email      String    @id @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String    @db.Text
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  expires_at     DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([expires_at], map: "personal_access_tokens_expires_at_index")
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model products {
+  id            BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  sku           String    @unique(map: "products_sku_unique") @db.VarChar(255)
+  name          String    @db.VarChar(255)
+  price         Decimal   @db.Decimal(10, 2)
+  b2b_price     Decimal?  @db.Decimal(10, 2)
+  stock         Int       @default(0)
+  is_on_shopify Boolean   @default(false)
+  is_published  Boolean   @default(false)
+  image_url     String?   @db.VarChar(255)
+  created_at    DateTime? @db.Timestamp(0)
+  updated_at    DateTime? @db.Timestamp(0)
+  is_active     Boolean   @default(true)
+}
+
+model sessions {
+  id            String  @id @db.VarChar(255)
+  user_id       BigInt? @db.UnsignedBigInt
+  ip_address    String? @db.VarChar(45)
+  user_agent    String? @db.Text
+  payload       String  @db.LongText
+  last_activity Int
+
+  @@index([last_activity], map: "sessions_last_activity_index")
+  @@index([user_id], map: "sessions_user_id_index")
+}
+
+model users {
+  id                BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String    @db.VarChar(255)
+  email             String    @unique(map: "users_email_unique") @db.VarChar(255)
+  email_verified_at DateTime? @db.Timestamp(0)
+  password          String    @db.VarChar(255)
+  remember_token    String?   @db.VarChar(100)
+  created_at        DateTime? @db.Timestamp(0)
+  updated_at        DateTime? @db.Timestamp(0)
 }

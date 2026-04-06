@@ -116,7 +116,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       console.log(`🔔 WEBHOOK GELDİ (ORDER): ${topic} -> ${endpoint} -> ${orderName}`);
       console.log("📦 SIPARIŞ DETAYI:", JSON.stringify(payload, null, 2));
       try {
-        await fetch(`${process.env.API_URL}/api/webhook/${endpoint}`, {
+        const laravelOrderResponse = await fetch(`${process.env.API_URL}/api/webhook/${endpoint}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -126,6 +126,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           },
           body: JSON.stringify(payload),
         });
+
+        const orderResponseText = await laravelOrderResponse.text();
+        console.log(`🚀 LARAVEL YANITI (ORDER ${topic}):`, orderResponseText);
 
         const orderLineItems = (payload as any).line_items || [];
         for (const item of orderLineItems) {
