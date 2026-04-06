@@ -15,6 +15,7 @@ RUN apk add --no-cache \
     nodejs \
     npm \
     mysql-client \
+    ca-certificates \
     # Runtime kütüphaneler
     libzip \
     libpng \
