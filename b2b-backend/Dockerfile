@@ -98,12 +98,14 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/ca.pem /etc/ssl/certs/aiven-ca.pem
 
 # Windows CRLF -> Unix LF dönüşümü
 RUN dos2unix /entrypoint.sh \
     && dos2unix /etc/nginx/nginx.conf \
     && dos2unix /etc/supervisor/conf.d/supervisord.conf \
-    && chmod +x /entrypoint.sh
+    && chmod +x /entrypoint.sh \
+    && chmod 644 /etc/ssl/certs/aiven-ca.pem
 
 # -------------------------------------------------------
 # 8. İzinler
